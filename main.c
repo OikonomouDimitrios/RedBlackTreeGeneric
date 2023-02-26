@@ -4,16 +4,16 @@
 int main() {
     printf("\nThis program simulates a Red Black Tree\n");
     char c = '*';
-    initializeBasicNodes();
+    RB_initializeTree();
     while (c != 'q') {
-        printf("\n insert(i), print(parent), delete(d), quit(q)\n");
+        printf("\ninsert(i), print(parent), delete(d), quit(q)\n");
         scanf("\n %c", &c);
         if (c == 'i') {
-            insertNode(&root);
+            RB_insertNode(&RBTree);
         } else if (c == 'p') {
-            printTree(root);
+            RB_printTree(&RBTree);
         } else if (c == 'd') {
-            deleteNode(&root);
+            RB_deleteNode(&RBTree);
         }
     }
     return 0;
