@@ -52,11 +52,13 @@ Node initializeNullNode();
 
 Node findNode(Node auxNode, int key);
 
+void freeNode(Node n);
+
 int getValueFromUser();
 
 void printTreeInternal(Node x);
 
-void RB_insertNode(RedBlackTree *redBlackTree) {
+void RBT_insertNode(RedBlackTree *redBlackTree) {
     int valueFromUser = getValueFromUser();
     if (findNode((*redBlackTree)->root, valueFromUser)) {
         printf("value already exists! No duplicates allowed.\n");
@@ -131,11 +133,12 @@ void insertFixup(RedBlackTree *redBlackTree, Node z) {
     (*redBlackTree)->root->colour = Black;
 }
 
-void RB_initializeTree() {
+RedBlackTree RBT_initializeTree() {
     RBTree = (RedBlackTree) malloc(sizeof(struct rbTree));
     nullNode = initializeNullNode();
     rootNode = nullNode;
     RBTree->root = rootNode;
+    return RBTree;
 }
 
 void rightRotate(RedBlackTree *redBlackTree, Node y) {
@@ -177,7 +180,7 @@ void leftRotate(RedBlackTree *redBlackTree, Node x) {
 
 }
 
-void RB_deleteNode(RedBlackTree *redBlackTree) {
+void RBT_deleteNode(RedBlackTree *redBlackTree) {
     Node z = findNode((*redBlackTree)->root, getValueFromUser());
     if (!z) {
         printf("No such key exists in RB Tree!\n");
@@ -209,7 +212,7 @@ void RB_deleteNode(RedBlackTree *redBlackTree) {
             y->left->parent = y;
             y->colour = z->colour;
         }
-        //delete node here
+        freeNode(z);
         if (y_original_Colour == Black) {
             deleteFixup(redBlackTree, x);
         }
@@ -288,7 +291,7 @@ Node findNode(Node auxNode, int key) {
     else return findNode(auxNode->right, key);
 }
 
-void RB_printTree(RedBlackTree *redBlackTree) {
+void RBT_printTree(RedBlackTree *redBlackTree) {
     printTreeInternal((*redBlackTree)->root);
 }
 
@@ -344,7 +347,6 @@ int getValueFromUser() {
     printf("\ngive me a key:");
     scanf("%d", &x);
     return x;
-
 }
 
 Node initializeNewNode(int key, Colour colour) {
@@ -363,4 +365,28 @@ Node initializeNullNode() {
     newRecord->right = newRecord;
     newRecord->parent = newRecord;
     return newRecord;
+}
+
+void RBT_postorder_walk(Node n, void (*callback)(Node)) {
+    if (n == NULL || n == nullNode) {
+        return;
+    }
+    RBT_postorder_walk(n->left, callback);
+    RBT_postorder_walk(n->right, callback);
+    callback(n);
+}
+
+void RBT_free(RedBlackTree *redBlackTree) {
+    // Free the nodes in the tree using a post-order traversal.
+    RBT_postorder_walk((*redBlackTree)->root, freeNode);
+    free(nullNode);
+    // Free the tree itself.
+    free(redBlackTree);
+}
+
+// Helper function to free a node.
+void freeNode(Node n) {
+//    free(n->key);
+//    free(n->value);
+    free(n);
 }

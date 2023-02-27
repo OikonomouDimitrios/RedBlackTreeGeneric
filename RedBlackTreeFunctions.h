@@ -11,14 +11,15 @@
 typedef struct node *Node;
 
 typedef struct rbTree *RedBlackTree;
-extern RedBlackTree RBTree;
 
-void RB_insertNode(RedBlackTree *redBlackTree);
+void RBT_insertNode(RedBlackTree *redBlackTree);
 
-void RB_initializeTree();
+RedBlackTree RBT_initializeTree();
 
-void RB_printTree(RedBlackTree *redBlackTree);
+void RBT_printTree(RedBlackTree *redBlackTree);
 
-void RB_deleteNode(RedBlackTree *redBlackTree);
+void RBT_deleteNode(RedBlackTree *redBlackTree);
+
+void RBT_free(RedBlackTree *redBlackTree);
 
 #endif //REDBLACKTREE_REDBLACKTREEFUNCTIONS_H

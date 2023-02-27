@@ -4,17 +4,18 @@
 int main() {
     printf("\nThis program simulates a Red Black Tree\n");
     char c = '*';
-    RB_initializeTree();
+    RedBlackTree RBTree = RBT_initializeTree();
     while (c != 'q') {
         printf("\ninsert(i), print(parent), delete(d), quit(q)\n");
         scanf("\n %c", &c);
         if (c == 'i') {
-            RB_insertNode(&RBTree);
+            RBT_insertNode(&RBTree);
         } else if (c == 'p') {
-            RB_printTree(&RBTree);
+            RBT_printTree(&RBTree);
         } else if (c == 'd') {
-            RB_deleteNode(&RBTree);
+            RBT_deleteNode(&RBTree);
         }
     }
+    RBT_free(&RBTree);
     return 0;
 }
