@@ -9,11 +9,11 @@ int main() {
         printf("\ninsert(i), print(parent), delete(d), quit(q)\n");
         scanf("\n %c", &c);
         if (c == 'i') {
-            RB_insertNode();
+            RB_insertNode(&RBTree);
         } else if (c == 'p') {
-            RB_printTree();
+            RB_printTree(&RBTree);
         } else if (c == 'd') {
-            RB_deleteNode();
+            RB_deleteNode(&RBTree);
         }
     }
     return 0;

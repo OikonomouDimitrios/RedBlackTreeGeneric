@@ -30,13 +30,13 @@ RedBlackTree RBTree;
 const char *colours[] = {"red", "black"};
 
 
-void insertFixup(Node z);
+void insertFixup(RedBlackTree *redBlackTree, Node z);
 
-void leftRotate(Node x);
+void leftRotate(RedBlackTree *redBlackTree, Node x);
 
-void rightRotate(Node y);
+void rightRotate(RedBlackTree *redBlackTree, Node y);
 
-void transplant(Node u, Node v);
+void transplant(RedBlackTree *redBlackTree, Node u, Node v);
 
 bool isLeftChild(Node node);
 
@@ -44,7 +44,7 @@ bool isRightChild(Node node);
 
 Node TreeMinimum(Node auxNode);
 
-void deleteFixup(Node x);
+void deleteFixup(RedBlackTree *redBlackTree, Node x);
 
 Node initializeNewNode(int key, Colour colour);
 
@@ -56,15 +56,15 @@ int getValueFromUser();
 
 void printTreeInternal(Node x);
 
-void RB_insertNode() {
+void RB_insertNode(RedBlackTree *redBlackTree) {
     int valueFromUser = getValueFromUser();
-    if (findNode((RBTree)->root, valueFromUser)) {
+    if (findNode((*redBlackTree)->root, valueFromUser)) {
         printf("value already exists! No duplicates allowed.\n");
         return;
     }
     Node newNode = initializeNewNode(valueFromUser, Red);
     Node y = nullNode;
-    Node x = (RBTree)->root;
+    Node x = (*redBlackTree)->root;
     while (x != nullNode) {
         y = x;
         if (newNode->key < x->key) {
@@ -75,16 +75,16 @@ void RB_insertNode() {
     }
     newNode->parent = y;
     if (y == nullNode) {
-        (RBTree)->root = newNode;
+        (*redBlackTree)->root = newNode;
     } else if (newNode->key < y->key) {
         y->left = newNode;
     } else {
         y->right = newNode;
     }
-    insertFixup(newNode);
+    insertFixup(redBlackTree, newNode);
 }
 
-void insertFixup(Node z) {
+void insertFixup(RedBlackTree *redBlackTree, Node z) {
     Node uncle;
     while (z->parent && z->parent != nullNode && z->parent->colour == Red) {
         if (!z->parent->parent || z->parent->parent == nullNode) {
@@ -100,12 +100,12 @@ void insertFixup(Node z) {
             } else {
                 if (z == z->parent->right) {
                     z = z->parent;
-                    leftRotate(z);
+                    leftRotate(redBlackTree, z);
                 }
                 z->parent->colour = Black;
                 if (z->parent->parent != nullNode) {
                     z->parent->parent->colour = Red;
-                    rightRotate(z->parent->parent);
+                    rightRotate(redBlackTree, z->parent->parent);
                 }
             }
         } else {
@@ -118,17 +118,17 @@ void insertFixup(Node z) {
             } else {
                 if (z == z->parent->left) {
                     z = z->parent;
-                    rightRotate(z);
+                    rightRotate(redBlackTree, z);
                 }
                 z->parent->colour = Black;
                 if (z->parent->parent != nullNode) {
                     z->parent->parent->colour = Red;
-                    leftRotate(z->parent->parent);
+                    leftRotate(redBlackTree, z->parent->parent);
                 }
             }
         }
     }
-    (RBTree)->root->colour = Black;
+    (*redBlackTree)->root->colour = Black;
 }
 
 void RB_initializeTree() {
@@ -138,7 +138,7 @@ void RB_initializeTree() {
     RBTree->root = rootNode;
 }
 
-void rightRotate(Node y) {
+void rightRotate(RedBlackTree *redBlackTree, Node y) {
     Node x = y->left;
     y->left = x->right;
     if (x->right != nullNode) {
@@ -146,7 +146,7 @@ void rightRotate(Node y) {
     }
     x->parent = y->parent;
     if (y->parent == nullNode) {
-        (RBTree)->root = x;
+        (*redBlackTree)->root = x;
     } else if (isLeftChild(y)) {
         y->parent->left = x;
     } else {
@@ -156,7 +156,7 @@ void rightRotate(Node y) {
     y->parent = x;
 }
 
-void leftRotate(Node x) {
+void leftRotate(RedBlackTree *redBlackTree, Node x) {
 //The pseudocode for LEFT-ROTATE assumes that x.right is not T.nil and that the
 //root’s parent is T.nil.
     Node y = x->right;
@@ -166,7 +166,7 @@ void leftRotate(Node x) {
     }
     y->parent = x->parent;
     if (x->parent == nullNode) {
-        (RBTree)->root = y;
+        (*redBlackTree)->root = y;
     } else if (isLeftChild(x)) {
         x->parent->left = y;
     } else {
@@ -177,8 +177,8 @@ void leftRotate(Node x) {
 
 }
 
-void RB_deleteNode() {
-    Node z = findNode((RBTree)->root, getValueFromUser());
+void RB_deleteNode(RedBlackTree *redBlackTree) {
+    Node z = findNode((*redBlackTree)->root, getValueFromUser());
     if (!z) {
         printf("No such key exists in RB Tree!\n");
         return;
@@ -188,10 +188,10 @@ void RB_deleteNode() {
         Node x;
         if (z->left == nullNode) {
             x = z->right;
-            transplant(z, z->right);
+            transplant(redBlackTree, z, z->right);
         } else if (z->right == nullNode) {
             x = z->left;
-            transplant(z, z->left);
+            transplant(redBlackTree, z, z->left);
 
         } else {
             y = TreeMinimum(z->right);
@@ -200,30 +200,30 @@ void RB_deleteNode() {
             if (y->parent == z) {
                 x->parent = y;
             } else {
-                transplant(y, y->right);
+                transplant(redBlackTree, y, y->right);
                 y->right = z->right;
                 y->right->parent = y;
             }
-            transplant(z, y);
+            transplant(redBlackTree, z, y);
             y->left = z->left;
             y->left->parent = y;
             y->colour = z->colour;
         }
         //delete node here
         if (y_original_Colour == Black) {
-            deleteFixup(x);
+            deleteFixup(redBlackTree, x);
         }
     }
 }
 
-void deleteFixup(Node x) {
-    while (x != (RBTree)->root && x->colour == Black) {
+void deleteFixup(RedBlackTree *redBlackTree, Node x) {
+    while (x != (*redBlackTree)->root && x->colour == Black) {
         if (x == x->parent->left) {
             Node w = x->parent->right;
             if (w->colour == Red) {
                 w->colour = Black; // case 1
                 x->parent->colour = Red; // case 1
-                leftRotate(x->parent); // case 1
+                leftRotate(redBlackTree, x->parent); // case 1
                 w = x->parent->right; // case 1
             }
             if (w->left->colour == Black && w->right->colour == Black) {
@@ -233,22 +233,22 @@ void deleteFixup(Node x) {
                 if (w->right->colour == Black) {
                     w->left->colour = Black; // case 3
                     w->colour = Red; // case 3
-                    rightRotate(w); // case 3
+                    rightRotate(redBlackTree, w); // case 3
                     w = x->parent->right; // case 3
                 }
 
                 w->colour = x->parent->colour; // case 4
                 x->parent->colour = Black; // case 4
                 w->right->colour = Black; // case 4
-                leftRotate(x->parent); // case 4
-                x = (RBTree)->root; // case 4
+                leftRotate(redBlackTree, x->parent); // case 4
+                x = (*redBlackTree)->root; // case 4
             }
         } else { // same as then clause with "right" and "left" exchanged
             Node w = x->parent->left;
             if (w->colour == Red) {
                 w->colour = Black; // case 1
                 x->parent->colour = Red; // case 1
-                rightRotate(x->parent); // case 1
+                rightRotate(redBlackTree, x->parent); // case 1
                 w = x->parent->left; // case 1
             }
             if (w->right->colour == Black && w->left->colour == Black) {
@@ -258,15 +258,15 @@ void deleteFixup(Node x) {
                 if (w->left->colour == Black) {
                     w->right->colour = Black; // case 3
                     w->colour = Red; // case 3
-                    leftRotate(w); // case 3
+                    leftRotate(redBlackTree, w); // case 3
                     w = x->parent->left; // case 3
                 }
 
                 w->colour = x->parent->colour; // case 4
                 x->parent->colour = Black; // case 4
                 w->left->colour = Black; // case 4
-                rightRotate(x->parent); // case 4
-                x = (RBTree)->root; // case 4
+                rightRotate(redBlackTree, x->parent); // case 4
+                x = (*redBlackTree)->root; // case 4
             }
         }
     }
@@ -288,8 +288,8 @@ Node findNode(Node auxNode, int key) {
     else return findNode(auxNode->right, key);
 }
 
-void RB_printTree() {
-    printTreeInternal((RBTree)->root);
+void RB_printTree(RedBlackTree *redBlackTree) {
+    printTreeInternal((*redBlackTree)->root);
 }
 
 void printTreeInternal(Node x) {
@@ -318,9 +318,9 @@ void printTreeInternal(Node x) {
     }
 }
 
-void transplant(Node u, Node v) {
+void transplant(RedBlackTree *redBlackTree, Node u, Node v) {
     if (u->parent == nullNode) {
-        (RBTree)->root = v;
+        (*redBlackTree)->root = v;
     } else if (isLeftChild(u)) {
         u->parent->left = v;
     } else {

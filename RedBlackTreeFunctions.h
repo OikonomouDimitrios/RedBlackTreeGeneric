@@ -9,14 +9,16 @@
 #include <string.h>
 
 typedef struct node *Node;
-typedef struct rbTree *RedBlackTree;
 
-void RB_insertNode();
+typedef struct rbTree *RedBlackTree;
+extern RedBlackTree RBTree;
+
+void RB_insertNode(RedBlackTree *redBlackTree);
 
 void RB_initializeTree();
 
-void RB_printTree();
+void RB_printTree(RedBlackTree *redBlackTree);
 
-void RB_deleteNode();
+void RB_deleteNode(RedBlackTree *redBlackTree);
 
 #endif //REDBLACKTREE_REDBLACKTREEFUNCTIONS_H
