@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <malloc.h>
+#include <assert.h>
 #include "RedBlackTreeFunctions.h"
 
 typedef enum Colour {
@@ -58,8 +59,8 @@ int getValueFromUser();
 
 void printTreeInternal(Node x);
 
-void RBT_insertNode(RedBlackTree *redBlackTree) {
-    int valueFromUser = getValueFromUser();
+void RBT_insertNode(RedBlackTree *redBlackTree, int valueFromUser) {
+
     if (findNode((*redBlackTree)->root, valueFromUser)) {
         printf("value already exists! No duplicates allowed.\n");
         return;
@@ -180,8 +181,8 @@ void leftRotate(RedBlackTree *redBlackTree, Node x) {
 
 }
 
-void RBT_deleteNode(RedBlackTree *redBlackTree) {
-    Node z = findNode((*redBlackTree)->root, getValueFromUser());
+void RBT_deleteNode(RedBlackTree *redBlackTree, int valueFromUser) {
+    Node z = findNode((*redBlackTree)->root, valueFromUser);
     if (!z) {
         printf("No such key exists in RB Tree!\n");
         return;
@@ -292,6 +293,7 @@ Node findNode(Node auxNode, int key) {
 }
 
 void RBT_printTree(RedBlackTree *redBlackTree) {
+    assert((*redBlackTree) && (*redBlackTree)->root);
     printTreeInternal((*redBlackTree)->root);
 }
 
@@ -342,15 +344,9 @@ bool isRightChild(Node node) {
 }
 
 
-int getValueFromUser() {
-    int x;
-    printf("\ngive me a key:");
-    scanf("%d", &x);
-    return x;
-}
-
 Node initializeNewNode(int key, Colour colour) {
     Node newRecord = (Node) malloc(sizeof(struct node));
+    assert(newRecord != NULL);
     newRecord->key = key;
     newRecord->colour = colour ? colour : Red;
     newRecord->left = nullNode;

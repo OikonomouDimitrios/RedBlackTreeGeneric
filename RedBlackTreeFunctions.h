@@ -12,13 +12,13 @@ typedef struct node *Node;
 
 typedef struct rbTree *RedBlackTree;
 
-void RBT_insertNode(RedBlackTree *redBlackTree);
+void RBT_insertNode(RedBlackTree *redBlackTree, int valueFromUser);
 
 RedBlackTree RBT_initializeTree();
 
 void RBT_printTree(RedBlackTree *redBlackTree);
 
-void RBT_deleteNode(RedBlackTree *redBlackTree);
+void RBT_deleteNode(RedBlackTree *redBlackTree, int valueFromUser);
 
 void RBT_free(RedBlackTree *redBlackTree);
 
