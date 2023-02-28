@@ -18,7 +18,7 @@ struct rbTree {
 };
 
 struct node {
-    int key;
+    int *key;
     Colour colour;
     Node left;
     Node right;
@@ -68,7 +68,7 @@ void RBT_insertNode(RedBlackTree *redBlackTree, int valueFromUser) {
     Node x = (*redBlackTree)->root;
     while (x != nullNode) {
         y = x;
-        if (newNode->key < x->key) {
+        if (*(newNode->key) < *(x->key)) {
             x = x->left;
         } else {
             x = x->right;
@@ -77,7 +77,7 @@ void RBT_insertNode(RedBlackTree *redBlackTree, int valueFromUser) {
     newNode->parent = y;
     if (y == nullNode) {
         (*redBlackTree)->root = newNode;
-    } else if (newNode->key < y->key) {
+    } else if (*(newNode->key) < *(y->key)) {
         y->left = newNode;
     } else {
         y->right = newNode;
@@ -285,8 +285,8 @@ Node TreeMinimum(Node auxNode) {
 
 Node findNode(Node auxNode, int key) {
     if (!auxNode || auxNode == nullNode) return NULL;
-    if (key == auxNode->key) return auxNode;
-    if (key < auxNode->key) return findNode(auxNode->left, key);
+    if (key == *(auxNode->key)) return auxNode;
+    if (key < *(auxNode->key)) return findNode(auxNode->left, key);
     else return findNode(auxNode->right, key);
 }
 
@@ -302,7 +302,7 @@ void printTreeInternal(Node x) {
         }
         char isLeftOrRightChild[50];
         char keyValue[4];
-        sprintf(keyValue, "%d", x->parent->key);
+        sprintf(keyValue, "%d", *(x->parent->key));
         if (isLeftChild(x)) {
             strcpy(isLeftOrRightChild, "left child of ");
             strcat(isLeftOrRightChild, keyValue);
@@ -312,7 +312,7 @@ void printTreeInternal(Node x) {
         } else if (x->parent == nullNode) {
             strcpy(isLeftOrRightChild, "root");
         }
-        printf("\nkey : %d color : %s is %s ", x->key, colours[x->colour], isLeftOrRightChild);
+        printf("\nkey : %d color : %s is %s ", *(x->key), colours[x->colour], isLeftOrRightChild);
         if (x->right != nullNode) {
             printTreeInternal(x->right);
         }
@@ -345,7 +345,8 @@ bool isRightChild(Node node) {
 Node initializeNewNode(int key, Colour colour) {
     Node newRecord = (Node) malloc(sizeof(struct node));
     assert(newRecord != NULL);
-    newRecord->key = key;
+    (newRecord->key) = (int *) malloc(sizeof(int));
+    *(newRecord->key) = key;
     newRecord->colour = colour ? colour : Red;
     newRecord->left = nullNode;
     newRecord->right = nullNode;
