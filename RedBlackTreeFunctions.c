@@ -55,8 +55,6 @@ Node findNode(Node auxNode, int key);
 
 void freeNode(Node n);
 
-int getValueFromUser();
-
 void printTreeInternal(Node x);
 
 void RBT_insertNode(RedBlackTree *redBlackTree, int valueFromUser) {
