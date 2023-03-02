@@ -14,7 +14,7 @@ typedef struct rbTree *RedBlackTree;
 
 void RBT_insertNode(RedBlackTree *redBlackTree, int valueFromUser);
 
-RedBlackTree RBT_initializeTree();
+RedBlackTree RBT_initializeTree(int (*compare)(const int, const int));
 
 void RBT_printTree(RedBlackTree *redBlackTree);
 

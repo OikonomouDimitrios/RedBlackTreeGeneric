@@ -15,6 +15,8 @@ typedef enum Colour {
 
 struct rbTree {
     Node root;
+
+    int (*compare)(int, int);
 };
 
 struct node {
@@ -25,7 +27,7 @@ struct node {
     Node parent;
 };
 
-Node rootNode, nullNode;
+Node nullNode;
 RedBlackTree RBTree;
 
 const char *colours[] = {"red", "black"};
@@ -51,7 +53,7 @@ Node initializeNewNode(int key, Colour colour);
 
 Node initializeNullNode();
 
-Node findNode(Node auxNode, int key);
+Node findNode(Node auxNode, RedBlackTree rbTree, int key);
 
 void freeNode(Node n);
 
@@ -59,7 +61,7 @@ void printTreeInternal(Node x);
 
 void RBT_insertNode(RedBlackTree *redBlackTree, int valueFromUser) {
 
-    if (findNode((*redBlackTree)->root, valueFromUser)) {
+    if (findNode((*redBlackTree)->root, *redBlackTree, valueFromUser)) {
         printf("value already exists! No duplicates allowed.\n");
         return;
     }
@@ -68,7 +70,7 @@ void RBT_insertNode(RedBlackTree *redBlackTree, int valueFromUser) {
     Node x = (*redBlackTree)->root;
     while (x != nullNode) {
         y = x;
-        if (*(newNode->key) < *(x->key)) {
+        if ((*redBlackTree)->compare(*(newNode->key), *(x->key)) < 0) {
             x = x->left;
         } else {
             x = x->right;
@@ -77,7 +79,7 @@ void RBT_insertNode(RedBlackTree *redBlackTree, int valueFromUser) {
     newNode->parent = y;
     if (y == nullNode) {
         (*redBlackTree)->root = newNode;
-    } else if (*(newNode->key) < *(y->key)) {
+    } else if ((*redBlackTree)->compare(*(newNode->key), *(y->key)) < 0) {
         y->left = newNode;
     } else {
         y->right = newNode;
@@ -132,11 +134,11 @@ void insertFixup(RedBlackTree *redBlackTree, Node z) {
     (*redBlackTree)->root->colour = Black;
 }
 
-RedBlackTree RBT_initializeTree() {
+RedBlackTree RBT_initializeTree(int (*compare)(int, int)) {
     RBTree = (RedBlackTree) malloc(sizeof(struct rbTree));
     nullNode = initializeNullNode();
-    rootNode = nullNode;
-    RBTree->root = rootNode;
+    RBTree->root = nullNode;
+    RBTree->compare = compare;
     return RBTree;
 }
 
@@ -159,7 +161,7 @@ void rightRotate(RedBlackTree *redBlackTree, Node y) {
 }
 
 void leftRotate(RedBlackTree *redBlackTree, Node x) {
-//The pseudocode for LEFT-ROTATE assumes that x.right is not T.nil and that the
+//The code for LEFT-ROTATE assumes that x.right is not T.nil and that the
 //root’s parent is T.nil.
     Node y = x->right;
     x->right = y->left;
@@ -180,38 +182,38 @@ void leftRotate(RedBlackTree *redBlackTree, Node x) {
 }
 
 void RBT_deleteNode(RedBlackTree *redBlackTree, int valueFromUser) {
-    Node z = findNode((*redBlackTree)->root, valueFromUser);
-    if (!z) {
+    Node nodeForDeletion = findNode((*redBlackTree)->root, *redBlackTree, valueFromUser);
+    if (!nodeForDeletion) {
         printf("No such key exists in RB Tree!\n");
         return;
     } else {
-        Node y = z;
+        Node y = nodeForDeletion;
         Colour y_original_Colour = y->colour;
         Node x;
-        if (z->left == nullNode) {
-            x = z->right;
-            transplant(redBlackTree, z, z->right);
-        } else if (z->right == nullNode) {
-            x = z->left;
-            transplant(redBlackTree, z, z->left);
+        if (nodeForDeletion->left == nullNode) {
+            x = nodeForDeletion->right;
+            transplant(redBlackTree, nodeForDeletion, nodeForDeletion->right);
+        } else if (nodeForDeletion->right == nullNode) {
+            x = nodeForDeletion->left;
+            transplant(redBlackTree, nodeForDeletion, nodeForDeletion->left);
 
         } else {
-            y = TreeMinimum(z->right);
+            y = TreeMinimum(nodeForDeletion->right);
             y_original_Colour = y->colour;
             x = y->right;
-            if (y->parent == z) {
+            if (y->parent == nodeForDeletion) {
                 x->parent = y;
             } else {
                 transplant(redBlackTree, y, y->right);
-                y->right = z->right;
+                y->right = nodeForDeletion->right;
                 y->right->parent = y;
             }
-            transplant(redBlackTree, z, y);
-            y->left = z->left;
+            transplant(redBlackTree, nodeForDeletion, y);
+            y->left = nodeForDeletion->left;
             y->left->parent = y;
-            y->colour = z->colour;
+            y->colour = nodeForDeletion->colour;
         }
-        freeNode(z);
+        freeNode(nodeForDeletion);
         if (y_original_Colour == Black) {
             deleteFixup(redBlackTree, x);
         }
@@ -283,11 +285,12 @@ Node TreeMinimum(Node auxNode) {
     return auxNode;
 }
 
-Node findNode(Node auxNode, int key) {
+Node findNode(Node auxNode, RedBlackTree rbTree, int key) {
     if (!auxNode || auxNode == nullNode) return NULL;
-    if (key == *(auxNode->key)) return auxNode;
-    if (key < *(auxNode->key)) return findNode(auxNode->left, key);
-    else return findNode(auxNode->right, key);
+    int result = rbTree->compare(key, *(auxNode->key));
+    if (result == 0) return auxNode;
+    if (result < 0) return findNode(auxNode->left, rbTree, key);
+    else return findNode(auxNode->right, rbTree, key);
 }
 
 void RBT_printTree(RedBlackTree *redBlackTree) {

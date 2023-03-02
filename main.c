@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include "RedBlackTreeFunctions.h"
+#include "IntegerTypeKey.h"
 
 int getValueFromUser();
 
 int main() {
     printf("\nThis program simulates a Red Black Tree\n");
     char c = '*';
-    RedBlackTree RBTree = RBT_initializeTree();
+    RedBlackTree RBTree = RBT_initializeTree(keyCompare);
     while (c != 'q') {
         printf("\ninsert(i), print(parent), delete(d), quit(q)\n");
         scanf("\n %c", &c);
