@@ -15,19 +15,22 @@ typedef enum Colour {
 
 struct rbTree {
     Node root;
+    Node sentinelNode; //to avoid edge cases with nulls
 
-    int (*compare)(int, int);
+    int (*compare)(const void *, const void *);
+
+    char *(*transformKeyToString)(const void *);
+
 };
 
 struct node {
-    int *key;
+    const void *key;
     Colour colour;
     Node left;
     Node right;
     Node parent;
 };
 
-Node nullNode;
 RedBlackTree RBTree;
 
 const char *colours[] = {"red", "black"};
@@ -45,32 +48,32 @@ bool isLeftChild(Node node);
 
 bool isRightChild(Node node);
 
-Node TreeMinimum(Node auxNode);
+Node TreeMinimum(Node auxNode, Node sentinelNode);
 
 void deleteFixup(RedBlackTree *redBlackTree, Node x);
 
-Node initializeNewNode(int key, Colour colour);
+Node initializeNewNode(Node sentinelNode, const void *key, Colour colour);
 
 Node initializeNullNode();
 
-Node findNode(Node auxNode, RedBlackTree rbTree, int key);
+Node findNode(Node auxNode, RedBlackTree rbTree, const void *key);
 
 void freeNode(Node n);
 
-void printTreeInternal(Node x);
+void printTreeInternal(RedBlackTree redBlackTree, Node x);
 
-void RBT_insertNode(RedBlackTree *redBlackTree, int valueFromUser) {
-
+void RBT_insertNode(RedBlackTree *redBlackTree, const void *valueFromUser) {
+    Node nullNode = (*redBlackTree)->sentinelNode;
     if (findNode((*redBlackTree)->root, *redBlackTree, valueFromUser)) {
         printf("value already exists! No duplicates allowed.\n");
         return;
     }
-    Node newNode = initializeNewNode(valueFromUser, Red);
+    Node newNode = initializeNewNode((*redBlackTree)->sentinelNode, valueFromUser, Red);
     Node y = nullNode;
     Node x = (*redBlackTree)->root;
     while (x != nullNode) {
         y = x;
-        if ((*redBlackTree)->compare(*(newNode->key), *(x->key)) < 0) {
+        if ((*redBlackTree)->compare((newNode->key), (x->key)) < 0) {
             x = x->left;
         } else {
             x = x->right;
@@ -79,7 +82,7 @@ void RBT_insertNode(RedBlackTree *redBlackTree, int valueFromUser) {
     newNode->parent = y;
     if (y == nullNode) {
         (*redBlackTree)->root = newNode;
-    } else if ((*redBlackTree)->compare(*(newNode->key), *(y->key)) < 0) {
+    } else if ((*redBlackTree)->compare((newNode->key), (y->key)) < 0) {
         y->left = newNode;
     } else {
         y->right = newNode;
@@ -89,6 +92,7 @@ void RBT_insertNode(RedBlackTree *redBlackTree, int valueFromUser) {
 
 void insertFixup(RedBlackTree *redBlackTree, Node z) {
     Node uncle;
+    Node nullNode = (*redBlackTree)->sentinelNode;
     while (z->parent && z->parent != nullNode && z->parent->colour == Red) {
         if (!z->parent->parent || z->parent->parent == nullNode) {
             break;
@@ -134,15 +138,19 @@ void insertFixup(RedBlackTree *redBlackTree, Node z) {
     (*redBlackTree)->root->colour = Black;
 }
 
-RedBlackTree RBT_initializeTree(int (*compare)(int, int)) {
+RedBlackTree
+RBT_initializeTree(int (*compare)(const void *, const void *), char *(*transformKeyToString)(const void *)) {
     RBTree = (RedBlackTree) malloc(sizeof(struct rbTree));
-    nullNode = initializeNullNode();
-    RBTree->root = nullNode;
+    Node sentinel = initializeNullNode();
+    RBTree->root = sentinel;
+    RBTree->sentinelNode = sentinel;
     RBTree->compare = compare;
+    RBTree->transformKeyToString = transformKeyToString;
     return RBTree;
 }
 
 void rightRotate(RedBlackTree *redBlackTree, Node y) {
+    Node nullNode = (*redBlackTree)->sentinelNode;
     Node x = y->left;
     y->left = x->right;
     if (x->right != nullNode) {
@@ -163,6 +171,7 @@ void rightRotate(RedBlackTree *redBlackTree, Node y) {
 void leftRotate(RedBlackTree *redBlackTree, Node x) {
 //The code for LEFT-ROTATE assumes that x.right is not T.nil and that the
 //root’s parent is T.nil.
+    Node nullNode = (*redBlackTree)->sentinelNode;
     Node y = x->right;
     x->right = y->left;
     if (y->left != nullNode) {
@@ -181,7 +190,8 @@ void leftRotate(RedBlackTree *redBlackTree, Node x) {
 
 }
 
-void RBT_deleteNode(RedBlackTree *redBlackTree, int valueFromUser) {
+void RBT_deleteNode(RedBlackTree *redBlackTree, const void *valueFromUser) {
+    Node nullNode = (*redBlackTree)->sentinelNode;
     Node nodeForDeletion = findNode((*redBlackTree)->root, *redBlackTree, valueFromUser);
     if (!nodeForDeletion) {
         printf("No such key exists in RB Tree!\n");
@@ -198,7 +208,7 @@ void RBT_deleteNode(RedBlackTree *redBlackTree, int valueFromUser) {
             transplant(redBlackTree, nodeForDeletion, nodeForDeletion->left);
 
         } else {
-            y = TreeMinimum(nodeForDeletion->right);
+            y = TreeMinimum(nodeForDeletion->right, (*redBlackTree)->sentinelNode);
             y_original_Colour = y->colour;
             x = y->right;
             if (y->parent == nodeForDeletion) {
@@ -278,16 +288,16 @@ void deleteFixup(RedBlackTree *redBlackTree, Node x) {
 }
 
 
-Node TreeMinimum(Node auxNode) {
-    while (auxNode->left != nullNode) {
-        return TreeMinimum(auxNode->left);
+Node TreeMinimum(Node auxNode, Node sentinelNode) {
+    while (auxNode->left != sentinelNode) {
+        return TreeMinimum(auxNode->left, sentinelNode);
     }
     return auxNode;
 }
 
-Node findNode(Node auxNode, RedBlackTree rbTree, int key) {
-    if (!auxNode || auxNode == nullNode) return NULL;
-    int result = rbTree->compare(key, *(auxNode->key));
+Node findNode(Node auxNode, RedBlackTree rbTree, const void *key) {
+    if (!auxNode || auxNode == (rbTree)->sentinelNode) return NULL;
+    int result = rbTree->compare(key, (auxNode->key));
     if (result == 0) return auxNode;
     if (result < 0) return findNode(auxNode->left, rbTree, key);
     else return findNode(auxNode->right, rbTree, key);
@@ -295,37 +305,47 @@ Node findNode(Node auxNode, RedBlackTree rbTree, int key) {
 
 void RBT_printTree(RedBlackTree *redBlackTree) {
     assert((*redBlackTree) && (*redBlackTree)->root);
-    printTreeInternal((*redBlackTree)->root);
+    printTreeInternal((*redBlackTree), (*redBlackTree)->root);
 }
 
-void printTreeInternal(Node x) {
-    if (x != nullNode) {
-        if (x->left != nullNode) {
-            printTreeInternal(x->left);
+void printTreeInternal(RedBlackTree redBlackTree, Node x) {
+    if (x != (redBlackTree)->sentinelNode) {
+        if (x->left != (redBlackTree)->sentinelNode) {
+            printTreeInternal(redBlackTree, x->left);
         }
         char isLeftOrRightChild[50];
         char keyValue[4];
-        sprintf(keyValue, "%d", *(x->parent->key));
+        char *strParentKey = NULL;
+        if (x->parent->key != NULL) {
+            strParentKey = redBlackTree->transformKeyToString(x->parent->key);
+            sprintf(keyValue, "%s", strParentKey);
+            free(strParentKey);
+//            sprintf(keyValue, "%s", ((char *) x->parent->key));
+//            sprintf(keyValue, "%d", *((int *) x->parent->key));
+        }
         if (isLeftChild(x)) {
             strcpy(isLeftOrRightChild, "left child of ");
             strcat(isLeftOrRightChild, keyValue);
         } else if (isRightChild(x)) {
             strcpy(isLeftOrRightChild, "right child of ");
             strcat(isLeftOrRightChild, keyValue);
-        } else if (x->parent == nullNode) {
+        } else if (x->parent == (redBlackTree)->sentinelNode) {
             strcpy(isLeftOrRightChild, "root");
         }
-        printf("\nkey : %d color : %s is %s ", *(x->key), colours[x->colour], isLeftOrRightChild);
-        if (x->right != nullNode) {
-            printTreeInternal(x->right);
+        char *strKey = redBlackTree->transformKeyToString(x->key);
+//        printf("\nkey : %d color : %s is %s ", *((int *) x->key), colours[x->colour], isLeftOrRightChild);
+        printf("\nkey : %s color : %s is %s ", strKey, colours[x->colour], isLeftOrRightChild);
+        free(strKey);
+        if (x->right != (redBlackTree)->sentinelNode) {
+            printTreeInternal(redBlackTree, x->right);
         }
-    } else if (x == nullNode) {
+    } else if (x == redBlackTree->sentinelNode) {
         printf("\n There are no nodes to print\n");
     }
 }
 
 void transplant(RedBlackTree *redBlackTree, Node u, Node v) {
-    if (u->parent == nullNode) {
+    if (u->parent == (*redBlackTree)->sentinelNode) {
         (*redBlackTree)->root = v;
     } else if (isLeftChild(u)) {
         u->parent->left = v;
@@ -345,39 +365,40 @@ bool isRightChild(Node node) {
 }
 
 
-Node initializeNewNode(int key, Colour colour) {
+Node initializeNewNode(Node sentinelNode, const void *key, Colour colour) {
     Node newRecord = (Node) malloc(sizeof(struct node));
     assert(newRecord != NULL);
-    (newRecord->key) = (int *) malloc(sizeof(int));
-    *(newRecord->key) = key;
+    (newRecord->key) = key;
     newRecord->colour = colour ? colour : Red;
-    newRecord->left = nullNode;
-    newRecord->right = nullNode;
-    newRecord->parent = nullNode;
+    newRecord->left = sentinelNode;
+    newRecord->right = sentinelNode;
+    newRecord->parent = sentinelNode;
     return newRecord;
 }
 
 Node initializeNullNode() {
-    Node newRecord = initializeNewNode(0, Black);
+    Node newRecord = (Node) malloc(sizeof(struct node));
+    assert(newRecord != NULL);
+    newRecord->colour = Black;
     newRecord->left = newRecord;
     newRecord->right = newRecord;
     newRecord->parent = newRecord;
     return newRecord;
 }
 
-void RBT_postorder_walk(Node n, void (*callback)(Node)) {
-    if (n == NULL || n == nullNode) {
+void RBT_postorder_walk(RedBlackTree *redBlackTree, Node n, void (*callback)(Node)) {
+    if (n == NULL || n == (*redBlackTree)->sentinelNode) {
         return;
     }
-    RBT_postorder_walk(n->left, callback);
-    RBT_postorder_walk(n->right, callback);
+    RBT_postorder_walk(redBlackTree, n->left, callback);
+    RBT_postorder_walk(redBlackTree, n->right, callback);
     callback(n);
 }
 
 void RBT_free(RedBlackTree *redBlackTree) {
     // Free the nodes in the tree using a post-order traversal.
-    RBT_postorder_walk((*redBlackTree)->root, freeNode);
-    free(nullNode);
+    RBT_postorder_walk(redBlackTree, (*redBlackTree)->root, freeNode);
+    free((*redBlackTree)->sentinelNode);
     // Free the tree itself.
     free(redBlackTree);
 }
