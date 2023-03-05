@@ -16,6 +16,6 @@ StringKey *new_string_type();
 
 int string_type_compare(const StringKey *k1, const StringKey *k2);
 
-char *string_type_to_string(const char *inputStr);
+void string_type_to_string(const char *inputStr, char *buffer, size_t buffer_size);
 
 #endif //REDBLACKTREEGENERIC_STRINGTYPEKEY_H

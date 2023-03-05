@@ -8,6 +8,8 @@
 #include <assert.h>
 #include "RedBlackTreeFunctions.h"
 
+#define BUFFER_SIZE 100
+
 typedef enum Colour {
     Red,
     Black
@@ -19,7 +21,7 @@ struct rbTree {
 
     int (*compare_func)(const void *, const void *);
 
-    char *(*transform_key_to_string_func)(const void *);
+    void (*transform_key_to_string_func)(const void *, char *buffer, size_t buffer_size);
 
 };
 
@@ -140,7 +142,7 @@ void rbt_insert_node_fixup(RedBlackTree *redBlackTree, Node aux_node) {
 
 RedBlackTree
 rbt_initialize_tree(int (*compare_func)(const void *, const void *),
-                    char *(*transform_key_to_string_func)(const void *)) {
+                    void(*transform_key_to_string_func)(const void *, char *buffer, size_t buffer_size)) {
     RBTree = (RedBlackTree) malloc(sizeof(struct rbTree));
     Node sentinel = rbt_initialize_sentinel();
     RBTree->root = sentinel;
@@ -313,12 +315,12 @@ void rbt_print_tree_internal(RedBlackTree redBlackTree, Node aux_node) {
             rbt_print_tree_internal(redBlackTree, aux_node->left);
         }
         char is_left_or_right_child[50];
-        char keyValue[4];
-        char *str_parent_key = NULL;
-        if (aux_node->parent->key != NULL) {
-            str_parent_key = redBlackTree->transform_key_to_string_func(aux_node->parent->key);
-            sprintf(keyValue, "%s", str_parent_key);
-            free(str_parent_key);
+        char keyValue[150];
+        char buffer[BUFFER_SIZE];
+        if (aux_node != NULL && aux_node->parent != (redBlackTree)->sentinel_node && aux_node->parent &&
+            aux_node->parent->key != NULL) {
+            redBlackTree->transform_key_to_string_func(aux_node->parent->key, buffer, BUFFER_SIZE);
+            sprintf(keyValue, "%s", buffer);
         }
         if (rbt_is_left_child(aux_node)) {
             strcpy(is_left_or_right_child, "left child of ");
@@ -329,9 +331,8 @@ void rbt_print_tree_internal(RedBlackTree redBlackTree, Node aux_node) {
         } else if (aux_node->parent == (redBlackTree)->sentinel_node) {
             strcpy(is_left_or_right_child, "root");
         }
-        char *str_key = redBlackTree->transform_key_to_string_func(aux_node->key);
-        printf("\nkey : %s color : %s is %s ", str_key, colours[aux_node->colour], is_left_or_right_child);
-        free(str_key);
+        redBlackTree->transform_key_to_string_func(aux_node->key, buffer, BUFFER_SIZE);
+        printf("\nkey : %s color : %s is %s ", buffer, colours[aux_node->colour], is_left_or_right_child);
         if (aux_node->right != (redBlackTree)->sentinel_node) {
             rbt_print_tree_internal(redBlackTree, aux_node->right);
         }
@@ -396,7 +397,7 @@ void rbt_free(RedBlackTree *redBlackTree) {
     rbt_postorder_walk(redBlackTree, (*redBlackTree)->root, rbt_free_node);
     free((*redBlackTree)->sentinel_node);
     // Free the tree itself.
-    free(redBlackTree);
+    free(*redBlackTree);
 }
 
 // Helper function to free a node.

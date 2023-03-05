@@ -16,6 +16,6 @@ IntKey *new_integer_type();
 
 int integer_type_compare(const IntKey *k1, const IntKey *k2);
 
-char *integer_type_to_string(const int *key);
+void integer_type_to_string(const int *key, char *buffer, size_t buffer_size);
 
 #endif //REDBLACKTREEGENERIC_INTEGERTYPEKEY_H

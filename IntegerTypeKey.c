@@ -17,9 +17,7 @@ int integer_type_compare(const IntKey *k1, const IntKey *k2) {
     return k1->key > k2->key ? 1 : k1->key == k2->key ? 0 : -1;
 }
 
-char *integer_type_to_string(const int *key) {
+void integer_type_to_string(const int *key, char *buffer, size_t buffer_size) {
     int value = *((int *) key);
-    char *str = malloc(sizeof(char) * 12); // Maximum number of characters needed for a 32-bit integer
-    sprintf(str, "%d", value);
-    return str;
+    snprintf(buffer, buffer_size, "%d", value);
 }
