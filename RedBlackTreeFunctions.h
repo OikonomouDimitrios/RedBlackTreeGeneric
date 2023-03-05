@@ -12,7 +12,7 @@ typedef struct node *Node;
 
 typedef struct rbTree *RedBlackTree;
 
-void rbt_insert_node(RedBlackTree *redBlackTree, const void *value_from_user);
+void rbt_insert_node(RedBlackTree *redBlackTree, void *value_from_user);
 
 RedBlackTree
 rbt_initialize_tree(int (*compare_func)(const void *, const void *), char *(*transform_key_to_string_func)(const void *));

@@ -24,7 +24,7 @@ struct rbTree {
 };
 
 struct node {
-    const void *key;
+    void *key;
     Colour colour;
     Node left;
     Node right;
@@ -52,7 +52,7 @@ Node rbt_tree_minimum(Node aux_node, Node sentinelNode);
 
 void rbt_delete_fixup(RedBlackTree *redBlackTree, Node aux_node);
 
-Node rbt_initialize_new_node(Node sentinel_node, const void *key, Colour colour);
+Node rbt_initialize_new_node(Node sentinel_node, void *key, Colour colour);
 
 Node rbt_initialize_sentinel();
 
@@ -62,7 +62,7 @@ void rbt_free_node(Node aux_node);
 
 void rbt_print_tree_internal(RedBlackTree redBlackTree, Node aux_node);
 
-void rbt_insert_node(RedBlackTree *redBlackTree, const void *value_from_user) {
+void rbt_insert_node(RedBlackTree *redBlackTree, void *value_from_user) {
     Node nullNode = (*redBlackTree)->sentinel_node;
     if (rbt_find_node((*redBlackTree)->root, *redBlackTree, value_from_user)) {
         printf("value already exists! No duplicates allowed.\n");
@@ -361,7 +361,7 @@ bool rbt_is_right_child(Node node) {
 }
 
 
-Node rbt_initialize_new_node(Node sentinel_node, const void *key, Colour colour) {
+Node rbt_initialize_new_node(Node sentinel_node, void *key, Colour colour) {
     Node newRecord = (Node) malloc(sizeof(struct node));
     assert(newRecord != NULL);
     (newRecord->key) = key;
@@ -401,7 +401,6 @@ void rbt_free(RedBlackTree *redBlackTree) {
 
 // Helper function to free a node.
 void rbt_free_node(Node aux_node) {
-//    free(aux_node->key);
-//    free(aux_node->value);
+    free(aux_node->key);
     free(aux_node);
 }

@@ -9,23 +9,13 @@
 #include <string.h>
 
 typedef struct StringKey {
-    char x[40];
-} StringTypeKey;
+    char key[150];
+} StringKey;
 
-StringTypeKey *newStringTypeKey() {
-    StringTypeKey *New = malloc(sizeof(StringTypeKey));
-    /* printf("%p\n", New); */
-    return New;
-}
+StringKey *new_string_type();
 
-int keyCompare(const char k1[], const char k2[]) {
-    return strcmp(k1, k2);
-}
+int string_type_compare(const StringKey *k1, const StringKey *k2);
 
-char *returnString(const char *inputStr) {
-    char *resultStr = malloc(strlen(inputStr) + 1);
-    strcpy(resultStr, inputStr);
-    return resultStr;
-}
+char *string_type_to_string(const char *inputStr);
 
 #endif //REDBLACKTREEGENERIC_STRINGTYPEKEY_H
