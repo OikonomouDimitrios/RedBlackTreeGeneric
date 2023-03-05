@@ -12,15 +12,15 @@ typedef struct node *Node;
 
 typedef struct rbTree *RedBlackTree;
 
-void RBT_insertNode(RedBlackTree *redBlackTree, const void *valueFromUser);
+void rbt_insert_node(RedBlackTree *redBlackTree, const void *value_from_user);
 
 RedBlackTree
-RBT_initializeTree(int (*compare)(const void *, const void *), char *(*transformKeyToString)(const void *));
+rbt_initialize_tree(int (*compare_func)(const void *, const void *), char *(*transform_key_to_string_func)(const void *));
 
-void RBT_printTree(RedBlackTree *redBlackTree);
+void rbt_print_tree(RedBlackTree *redBlackTree);
 
-void RBT_deleteNode(RedBlackTree *redBlackTree, const void *valueFromUser);
+void rbt_delete_node(RedBlackTree *redBlackTree, const void *value_from_user);
 
-void RBT_free(RedBlackTree *redBlackTree);
+void rbt_free(RedBlackTree *redBlackTree);
 
 #endif //REDBLACKTREE_REDBLACKTREEFUNCTIONS_H

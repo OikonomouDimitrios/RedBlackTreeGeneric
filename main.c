@@ -10,23 +10,23 @@ char *getStringValueFromUser();
 int main() {
     printf("\nThis program simulates a Red Black Tree\n");
     char c = '*';
-    RedBlackTree RBTree = RBT_initializeTree((int (*)(const void *, const void *)) intKeyCompare,
+    RedBlackTree RBTree = rbt_initialize_tree((int (*)(const void *, const void *)) intKeyCompare,
                                               (char *(*)(const void *)) intKeyToString);
-//    RedBlackTree RBTree = RBT_initializeTree((int (*)(const void *, const void *)) keyCompare,
+//    RedBlackTree RBTree = rbt_initialize_tree((int (*)(const void *, const void *)) keyCompare,
 //                                             (char *(*)(const void *)) returnString);
 
     while (c != 'q') {
         printf("\ninsert(i), print(parent), delete(d), quit(q)\n");
         scanf("\n %c", &c);
         if (c == 'i') {
-            RBT_insertNode(&RBTree, (void *) getValueFromUser());
+            rbt_insert_node(&RBTree, (void *) getValueFromUser());
         } else if (c == 'p') {
-            RBT_printTree(&RBTree);
+            rbt_print_tree(&RBTree);
         } else if (c == 'd') {
-            RBT_deleteNode(&RBTree, (void *) getValueFromUser());
+            rbt_delete_node(&RBTree, (void *) getValueFromUser());
         }
     }
-    RBT_free(&RBTree);
+    rbt_free(&RBTree);
     return 0;
 }
 
