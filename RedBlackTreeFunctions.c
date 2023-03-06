@@ -44,7 +44,7 @@ void rbt_left_rotate(RedBlackTree *redBlackTree, Node aux_node);
 
 void rbt_right_rotate(RedBlackTree *redBlackTree, Node aux_node);
 
-void rbt_transplant(RedBlackTree *redBlackTree, Node aux_node, Node v);
+void rbt_transplant(RedBlackTree *redBlackTree, Node old_node, Node new_node);
 
 bool rbt_is_left_child(Node node);
 
@@ -71,23 +71,23 @@ void rbt_insert_node(RedBlackTree *redBlackTree, void *value_from_user) {
         return;
     }
     Node new_node = rbt_initialize_new_node((*redBlackTree)->sentinel_node, value_from_user, Red);
-    Node y = nullNode;
-    Node x = (*redBlackTree)->root;
-    while (x != nullNode) {
-        y = x;
-        if ((*redBlackTree)->compare_func((new_node->key), (x->key)) < 0) {
-            x = x->left;
+    Node parent_node = nullNode;
+    Node current_node = (*redBlackTree)->root;
+    while (current_node != nullNode) {
+        parent_node = current_node;
+        if ((*redBlackTree)->compare_func((new_node->key), (current_node->key)) < 0) {
+            current_node = current_node->left;
         } else {
-            x = x->right;
+            current_node = current_node->right;
         }
     }
-    new_node->parent = y;
-    if (y == nullNode) {
+    new_node->parent = parent_node;
+    if (parent_node == nullNode) {
         (*redBlackTree)->root = new_node;
-    } else if ((*redBlackTree)->compare_func((new_node->key), (y->key)) < 0) {
-        y->left = new_node;
+    } else if ((*redBlackTree)->compare_func((new_node->key), (parent_node->key)) < 0) {
+        parent_node->left = new_node;
     } else {
-        y->right = new_node;
+        parent_node->right = new_node;
     }
     rbt_insert_node_fixup(redBlackTree, new_node);
 }
@@ -154,40 +154,40 @@ rbt_initialize_tree(int (*compare_func)(const void *, const void *),
 
 void rbt_right_rotate(RedBlackTree *redBlackTree, Node aux_node) {
     Node nullNode = (*redBlackTree)->sentinel_node;
-    Node x = aux_node->left;
-    aux_node->left = x->right;
-    if (x->right != nullNode) {
-        x->right->parent = aux_node;
+    Node new_parent = aux_node->left;
+    aux_node->left = new_parent->right;
+    if (new_parent->right != nullNode) {
+        new_parent->right->parent = aux_node;
     }
-    x->parent = aux_node->parent;
+    new_parent->parent = aux_node->parent;
     if (aux_node->parent == nullNode) {
-        (*redBlackTree)->root = x;
+        (*redBlackTree)->root = new_parent;
     } else if (rbt_is_left_child(aux_node)) {
-        aux_node->parent->left = x;
+        aux_node->parent->left = new_parent;
     } else {
-        aux_node->parent->right = x;
+        aux_node->parent->right = new_parent;
     }
-    x->right = aux_node;
-    aux_node->parent = x;
+    new_parent->right = aux_node;
+    aux_node->parent = new_parent;
 }
 
 void rbt_left_rotate(RedBlackTree *redBlackTree, Node aux_node) {
     Node nullNode = (*redBlackTree)->sentinel_node;
-    Node y = aux_node->right;
-    aux_node->right = y->left;
-    if (y->left != nullNode) {
-        y->left->parent = aux_node;
+    Node new_parent = aux_node->right;
+    aux_node->right = new_parent->left;
+    if (new_parent->left != nullNode) {
+        new_parent->left->parent = aux_node;
     }
-    y->parent = aux_node->parent;
+    new_parent->parent = aux_node->parent;
     if (aux_node->parent == nullNode) {
-        (*redBlackTree)->root = y;
+        (*redBlackTree)->root = new_parent;
     } else if (rbt_is_left_child(aux_node)) {
-        aux_node->parent->left = y;
+        aux_node->parent->left = new_parent;
     } else {
-        aux_node->parent->right = y;
+        aux_node->parent->right = new_parent;
     }
-    y->left = aux_node;
-    aux_node->parent = y;
+    new_parent->left = aux_node;
+    aux_node->parent = new_parent;
 
 }
 
@@ -200,20 +200,20 @@ void rbt_delete_node(RedBlackTree *redBlackTree, const void *value_from_user) {
     } else {
         Node y = node_to_be_deleted;
         Colour y_original_Colour = y->colour;
-        Node x;
+        Node replacement_node;
         if (node_to_be_deleted->left == nullNode) {
-            x = node_to_be_deleted->right;
+            replacement_node = node_to_be_deleted->right;
             rbt_transplant(redBlackTree, node_to_be_deleted, node_to_be_deleted->right);
         } else if (node_to_be_deleted->right == nullNode) {
-            x = node_to_be_deleted->left;
+            replacement_node = node_to_be_deleted->left;
             rbt_transplant(redBlackTree, node_to_be_deleted, node_to_be_deleted->left);
 
         } else {
             y = rbt_tree_minimum(node_to_be_deleted->right, (*redBlackTree)->sentinel_node);
             y_original_Colour = y->colour;
-            x = y->right;
+            replacement_node = y->right;
             if (y->parent == node_to_be_deleted) {
-                x->parent = y;
+                replacement_node->parent = y;
             } else {
                 rbt_transplant(redBlackTree, y, y->right);
                 y->right = node_to_be_deleted->right;
@@ -226,7 +226,7 @@ void rbt_delete_node(RedBlackTree *redBlackTree, const void *value_from_user) {
         }
         rbt_free_node(node_to_be_deleted);
         if (y_original_Colour == Black) {
-            rbt_delete_fixup(redBlackTree, x);
+            rbt_delete_fixup(redBlackTree, replacement_node);
         }
     }
 }
@@ -234,27 +234,27 @@ void rbt_delete_node(RedBlackTree *redBlackTree, const void *value_from_user) {
 void rbt_delete_fixup(RedBlackTree *redBlackTree, Node aux_node) {
     while (aux_node != (*redBlackTree)->root && aux_node->colour == Black) {
         if (aux_node == aux_node->parent->left) {
-            Node w = aux_node->parent->right;
-            if (w->colour == Red) {
-                w->colour = Black; // case 1
+            Node sibling_node = aux_node->parent->right;
+            if (sibling_node->colour == Red) {
+                sibling_node->colour = Black; // case 1
                 aux_node->parent->colour = Red; // case 1
                 rbt_left_rotate(redBlackTree, aux_node->parent); // case 1
-                w = aux_node->parent->right; // case 1
+                sibling_node = aux_node->parent->right; // case 1
             }
-            if (w->left->colour == Black && w->right->colour == Black) {
-                w->colour = Red; // case 2
+            if (sibling_node->left->colour == Black && sibling_node->right->colour == Black) {
+                sibling_node->colour = Red; // case 2
                 aux_node = aux_node->parent; // case 2
             } else {
-                if (w->right->colour == Black) {
-                    w->left->colour = Black; // case 3
-                    w->colour = Red; // case 3
-                    rbt_right_rotate(redBlackTree, w); // case 3
-                    w = aux_node->parent->right; // case 3
+                if (sibling_node->right->colour == Black) {
+                    sibling_node->left->colour = Black; // case 3
+                    sibling_node->colour = Red; // case 3
+                    rbt_right_rotate(redBlackTree, sibling_node); // case 3
+                    sibling_node = aux_node->parent->right; // case 3
                 }
 
-                w->colour = aux_node->parent->colour; // case 4
+                sibling_node->colour = aux_node->parent->colour; // case 4
                 aux_node->parent->colour = Black; // case 4
-                w->right->colour = Black; // case 4
+                sibling_node->right->colour = Black; // case 4
                 rbt_left_rotate(redBlackTree, aux_node->parent); // case 4
                 aux_node = (*redBlackTree)->root; // case 4
             }
@@ -341,15 +341,15 @@ void rbt_print_tree_internal(RedBlackTree redBlackTree, Node aux_node) {
     }
 }
 
-void rbt_transplant(RedBlackTree *redBlackTree, Node aux_node, Node v) {
-    if (aux_node->parent == (*redBlackTree)->sentinel_node) {
-        (*redBlackTree)->root = v;
-    } else if (rbt_is_left_child(aux_node)) {
-        aux_node->parent->left = v;
+void rbt_transplant(RedBlackTree *redBlackTree, Node old_node, Node new_node) {
+    if (old_node->parent == (*redBlackTree)->sentinel_node) {
+        (*redBlackTree)->root = new_node;
+    } else if (rbt_is_left_child(old_node)) {
+        old_node->parent->left = new_node;
     } else {
-        aux_node->parent->right = v;
+        old_node->parent->right = new_node;
     }
-    v->parent = aux_node->parent;
+    new_node->parent = old_node->parent;
 }
 
 
