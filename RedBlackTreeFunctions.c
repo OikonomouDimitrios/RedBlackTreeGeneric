@@ -64,10 +64,10 @@ void rbt_free_node(Node aux_node);
 
 void rbt_print_tree_internal(RedBlackTree redBlackTree, Node aux_node);
 
-void rbt_insert_node(RedBlackTree *redBlackTree, void *value_from_user) {
+void rbt_insert_node(RedBlackTree *redBlackTree, void *value_from_user, int *error) {
     Node nullNode = (*redBlackTree)->sentinel_node;
     if (rbt_find_node((*redBlackTree)->root, *redBlackTree, value_from_user)) {
-        printf("value already exists! No duplicates allowed.\n");
+        *error = 1;
         return;
     }
     Node new_node = rbt_initialize_new_node((*redBlackTree)->sentinel_node, value_from_user, Red);
@@ -90,6 +90,7 @@ void rbt_insert_node(RedBlackTree *redBlackTree, void *value_from_user) {
         parent_node->right = new_node;
     }
     rbt_insert_node_fixup(redBlackTree, new_node);
+    *error = 0;
 }
 
 void rbt_insert_node_fixup(RedBlackTree *redBlackTree, Node aux_node) {
@@ -144,6 +145,7 @@ RedBlackTree
 rbt_initialize_tree(int (*compare_func)(const void *, const void *),
                     void(*transform_key_to_string_func)(const void *, char *buffer, size_t buffer_size)) {
     RBTree = (RedBlackTree) malloc(sizeof(struct rbTree));
+    assert(RBTree != NULL);
     Node sentinel = rbt_initialize_sentinel();
     RBTree->root = sentinel;
     RBTree->sentinel_node = sentinel;
@@ -191,11 +193,11 @@ void rbt_left_rotate(RedBlackTree *redBlackTree, Node aux_node) {
 
 }
 
-void rbt_delete_node(RedBlackTree *redBlackTree, const void *value_from_user) {
+void rbt_delete_node(RedBlackTree *redBlackTree, const void *value_from_user, int *error) {
     Node nullNode = (*redBlackTree)->sentinel_node;
     Node node_to_be_deleted = rbt_find_node((*redBlackTree)->root, *redBlackTree, value_from_user);
     if (!node_to_be_deleted) {
-        printf("No such key exists in RB Tree!\n");
+        *error = 1;
         return;
     } else {
         Node y = node_to_be_deleted;
@@ -229,6 +231,7 @@ void rbt_delete_node(RedBlackTree *redBlackTree, const void *value_from_user) {
             rbt_delete_fixup(redBlackTree, replacement_node);
         }
     }
+    *error = 0;
 }
 
 void rbt_delete_fixup(RedBlackTree *redBlackTree, Node aux_node) {
