@@ -9,6 +9,7 @@
 #include "RedBlackTreeFunctions.h"
 
 #define BUFFER_SIZE 100
+typedef struct node *Node;
 
 typedef enum Colour {
     Red,

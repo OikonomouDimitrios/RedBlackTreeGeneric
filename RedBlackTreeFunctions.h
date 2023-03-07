@@ -8,7 +8,6 @@
 #include <stdbool.h>
 #include <string.h>
 
-typedef struct node *Node;
 
 typedef struct rbTree *RedBlackTree;
 
