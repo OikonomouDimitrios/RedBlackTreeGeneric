@@ -324,7 +324,7 @@ void rbt_print_tree_internal(RedBlackTree redBlackTree, Node aux_node, int *is_e
     char is_left_or_right_child[50];
     char keyValue[150];
     char buffer[BUFFER_SIZE];
-    if (aux_node != NULL && aux_node->parent != (redBlackTree)->sentinel_node && aux_node->parent &&
+    if (aux_node->parent != (redBlackTree)->sentinel_node && aux_node->parent &&
         aux_node->parent->key != NULL) {
         redBlackTree->transform_key_to_string_func(aux_node->parent->key, buffer, BUFFER_SIZE);
         sprintf(keyValue, "%s", buffer);
