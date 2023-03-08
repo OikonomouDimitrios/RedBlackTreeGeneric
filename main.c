@@ -10,7 +10,7 @@ StringKey *getStringValueFromUser();
 int main() {
     printf("\nThis program simulates a Red Black Tree\n");
     char c = '*';
-    int error = 0;
+    int error, is_empty = 0;
     RedBlackTree RBTree = rbt_initialize_tree((int (*)(const void *, const void *)) integer_type_compare,
                                               (void (*)(const void *, char *buffer,
                                                         size_t buffer_size)) integer_type_to_string);
@@ -30,7 +30,10 @@ int main() {
             }
 //            rbt_insert_node(&RBTree_string, (void *) getStringValueFromUser());
         } else if (c == 'p') {
-            rbt_print_tree(&RBTree);
+            rbt_print_tree(&RBTree, &is_empty);
+            if (is_empty) {
+                printf("Tree is empty!");
+            }
 //            rbt_print_tree(&RBTree_string);
         } else if (c == 'd') {
             rbt_delete_node(&RBTree, (void *) getValueFromUser(), &error);

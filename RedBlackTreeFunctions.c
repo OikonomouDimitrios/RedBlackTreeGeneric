@@ -63,7 +63,7 @@ Node rbt_find_node(Node auxNode, RedBlackTree rbTree, const void *key);
 
 void rbt_free_node(Node aux_node);
 
-void rbt_print_tree_internal(RedBlackTree redBlackTree, Node aux_node);
+void rbt_print_tree_internal(RedBlackTree redBlackTree, Node aux_node, int *is_empty);
 
 void rbt_insert_node(RedBlackTree *redBlackTree, void *value_from_user, int *error) {
     Node nullNode = (*redBlackTree)->sentinel_node;
@@ -308,41 +308,43 @@ Node rbt_find_node(Node auxNode, RedBlackTree rbTree, const void *key) {
     else return rbt_find_node(auxNode->right, rbTree, key);
 }
 
-void rbt_print_tree(RedBlackTree *redBlackTree) {
+void rbt_print_tree(RedBlackTree *redBlackTree, int *is_empty) {
     assert((*redBlackTree) && (*redBlackTree)->root);
-    rbt_print_tree_internal((*redBlackTree), (*redBlackTree)->root);
+    rbt_print_tree_internal((*redBlackTree), (*redBlackTree)->root, is_empty);
 }
 
-void rbt_print_tree_internal(RedBlackTree redBlackTree, Node aux_node) {
-    if (aux_node != (redBlackTree)->sentinel_node) {
-        if (aux_node->left != (redBlackTree)->sentinel_node) {
-            rbt_print_tree_internal(redBlackTree, aux_node->left);
-        }
-        char is_left_or_right_child[50];
-        char keyValue[150];
-        char buffer[BUFFER_SIZE];
-        if (aux_node != NULL && aux_node->parent != (redBlackTree)->sentinel_node && aux_node->parent &&
-            aux_node->parent->key != NULL) {
-            redBlackTree->transform_key_to_string_func(aux_node->parent->key, buffer, BUFFER_SIZE);
-            sprintf(keyValue, "%s", buffer);
-        }
-        if (rbt_is_left_child(aux_node)) {
-            strcpy(is_left_or_right_child, "left child of ");
-            strcat(is_left_or_right_child, keyValue);
-        } else if (rbt_is_right_child(aux_node)) {
-            strcpy(is_left_or_right_child, "right child of ");
-            strcat(is_left_or_right_child, keyValue);
-        } else if (aux_node->parent == (redBlackTree)->sentinel_node) {
-            strcpy(is_left_or_right_child, "root");
-        }
-        redBlackTree->transform_key_to_string_func(aux_node->key, buffer, BUFFER_SIZE);
-        printf("\nkey : %s color : %s is %s ", buffer, colours[aux_node->colour], is_left_or_right_child);
-        if (aux_node->right != (redBlackTree)->sentinel_node) {
-            rbt_print_tree_internal(redBlackTree, aux_node->right);
-        }
-    } else if (aux_node == redBlackTree->sentinel_node) {
-        printf("\n There are no nodes to print\n");
+void rbt_print_tree_internal(RedBlackTree redBlackTree, Node aux_node, int *is_empty) {
+    if (aux_node == redBlackTree->sentinel_node || aux_node == NULL) {
+        *is_empty = 1;
+        return;
     }
+    if (aux_node->left != (redBlackTree)->sentinel_node) {
+        rbt_print_tree_internal(redBlackTree, aux_node->left, is_empty);
+    }
+    char is_left_or_right_child[50];
+    char keyValue[150];
+    char buffer[BUFFER_SIZE];
+    if (aux_node != NULL && aux_node->parent != (redBlackTree)->sentinel_node && aux_node->parent &&
+        aux_node->parent->key != NULL) {
+        redBlackTree->transform_key_to_string_func(aux_node->parent->key, buffer, BUFFER_SIZE);
+        sprintf(keyValue, "%s", buffer);
+    }
+    if (rbt_is_left_child(aux_node)) {
+        strcpy(is_left_or_right_child, "left child of ");
+        strcat(is_left_or_right_child, keyValue);
+    } else if (rbt_is_right_child(aux_node)) {
+        strcpy(is_left_or_right_child, "right child of ");
+        strcat(is_left_or_right_child, keyValue);
+    } else if (aux_node->parent == (redBlackTree)->sentinel_node) {
+        strcpy(is_left_or_right_child, "root");
+    }
+    redBlackTree->transform_key_to_string_func(aux_node->key, buffer, BUFFER_SIZE);
+    printf("\nkey : %s color : %s is %s ", buffer, colours[aux_node->colour], is_left_or_right_child);
+    if (aux_node->right != (redBlackTree)->sentinel_node) {
+        rbt_print_tree_internal(redBlackTree, aux_node->right, is_empty);
+    }
+    *is_empty = 0;
+
 }
 
 void rbt_transplant(RedBlackTree *redBlackTree, Node old_node, Node new_node) {
@@ -402,6 +404,7 @@ void rbt_free(RedBlackTree *redBlackTree) {
     free((*redBlackTree)->sentinel_node);
     // Free the tree itself.
     free(*redBlackTree);
+    *redBlackTree = NULL;
 }
 
 // Helper function to free a node.

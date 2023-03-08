@@ -58,16 +58,15 @@ rbt_initialize_tree(int (*compare_func)(const void *, const void *),
  * Prints the Red-Black Tree in a depth-first order
  *
  * Preconditions:
- * - redBlackTree points to a valid RedBlackTree object that has been initialized using rbt_initialize_tree function
- *
+ *  - redBlackTree: a pointer to a RedBlackTree struct that has been initialized.
+ *  - is_empty: a pointer to an int variable that has been initialized.
  * Postconditions:
  * - The tree structure is printed to the console in a human-readable format
  * - The output includes the key value and color of each node in the tree, as well as its parent-child relationship
- * - The output is formatted such that the left child of a node is printed before the parent, and the right child after
- * - The output also includes a message indicating if the node is the root of the tree or a left/right child of its parent
- * - If the tree is empty, a message indicating so is printed to the console TODO USE ERROR INT
+ * - The output includes a message indicating if the node is the root of the tree or a left/right child of its parent
+ * - The value of is_empty is set to 1 if the tree is empty, or 0 if it is not.
  */
-void rbt_print_tree(RedBlackTree *redBlackTree);
+void rbt_print_tree(RedBlackTree *redBlackTree, int *is_empty);
 
 /**
  * Deletes the node with the specified value from the given Red-Black Tree.
@@ -96,7 +95,7 @@ void rbt_delete_node(RedBlackTree *redBlackTree, const void *value_from_user, in
  *
  * Postconditions:
  * - The memory used by the Red-Black Tree and all of its nodes is freed.
- * - The pointer to the Red-Black Tree object is set to NULL. TODO ADD NULL FOR RBTREE!!!
+ * - The pointer to the Red-Black Tree object is set to NULL.
  */
 void rbt_free(RedBlackTree *redBlackTree);
 
